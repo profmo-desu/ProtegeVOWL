@@ -460,14 +460,23 @@ public class TransformOWLtoGraph {
 			className = tgu.helperExtractLabelNameFromIRIIfLabelHasNoName(className, classIRI);
 			int classID = GraphStorage.getNewID();
 			// if the namespace of this class is equals to OWL_THING_CLASS_URI its a OWLThingClass -> we have to add a special class
+		
 			if (OWL_THING_CLASS_URI.equals(classIRI) || owl_class.isOWLThing()) {
 				mod.addClassThingWithDetails(0, classID, className, classIRI, classComment, definedBy, owlVersion);
 			} else {
+				
 				// check the namespace of the class if the class is imported or not
-				IRI ontoIRI = onto.getOntologyID().getOntologyIRI().get();
-				if (ontoIRI == null && definedBy != null) {
-					ontoIRI = IRI.create(definedBy);
+				IRI ontoIRI;
+				if (onto.getOntologyID().getOntologyIRI().isPresent()) {
+					ontoIRI = onto.getOntologyID().getOntologyIRI().get();
+				} else {
+					if (definedBy != null) {
+						ontoIRI = IRI.create(definedBy);
+					} else {
+						ontoIRI = IRI.create("none");
+					}
 				}
+				
 				boolean isImported = tgu.hasDifferentNamespace(classIRI, ontoIRI);
 
 				// check if the extracted Class is a equivalent class
